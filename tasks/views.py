@@ -3,15 +3,19 @@ from .models import Task
 
 
 def list(request):
-    tasks = Task.objects.all()
+    if request.user.is_superuser:
+        tasks = Task.objects.all()
+    else:
+        tasks = Task.objects.filter(user=request.user.id)
     return render(request, './index.html', {'tasks': tasks})
 
 
 def create(request):
     if request.method == 'POST':
+        user = request.user
         title = request.POST.get('title')
         description = request.POST.get('description')
-        Task.objects.create(title=title, description=description)
+        Task.objects.create(title=title, description=description, user=user)
         return redirect('list')
     return render(request, 'create.html')
 
